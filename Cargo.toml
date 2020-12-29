@@ -1,0 +1,34 @@
+[package]
+name = "relic"
+version = "0.0.1"
+edition = "2018"
+authors = ["phR0ze"]
+license = "MIT OR Apache-2.0"
+description = "Package management for cyberlinux"
+readme = "README.md"
+homepage = "https://github.com/phR0ze/relic"
+repository = "https://github.com/phR0ze/relic"
+exclude = [
+  "docs",
+  "examples",
+  ".git",
+  ".githooks",
+  ".github",
+  "tests",
+  "benches",
+  "target",
+  ".vscode"
+]
+
+# Higher the opt-level value the slower the compile time
+[profile.release]
+opt-level = 3   # Optimize for speed over size
+lto = true      # Futher assist in optimization
+
+[profile.dev]
+opt-level = 0   # Default no optimization
+
+[dependencies]
+
+# Examples and tests are built with these dependencies
+[dev-dependencies]
