@@ -6,7 +6,7 @@
 // https://git.archlinux.org/pacman.git/tree/
 // https://wiki.archlinux.org/index.php/pacman
 // https://users.rust-lang.org/t/half-baked-alpm-arch-linux-package-manager-implementation/18969
-use crate::errors::*;
+use crate::error::*;
 use skellige::prelude::*;
 
 const TMPDIR: &str = "abs";
@@ -28,7 +28,7 @@ impl Repo {
         match repo.as_ref() {
             REPO_PACKAGES_NAME => Ok(Repo::Packages),
             REPO_COMMUNITY_NAME => Ok(Repo::Community),
-            _ => Err(RelicError::repo_not_found(repo.as_ref().to_string()).into()),
+            _ => Err(RelicError::repo_not_found(repo.as_ref().to_string())),
         }
     }
 }
@@ -70,7 +70,7 @@ pub fn repo<T: AsRef<str>>(pkg: T) -> RelicResult<Repo> {
             return Repo::from(name);
         }
     }
-    Err(RelicError::package_not_found(pkg).into())
+    Err(RelicError::package_not_found(pkg))
 }
 
 /// Download the package source for `pkg` to `dst`.
@@ -99,13 +99,13 @@ pub fn source<T: AsRef<str>, U: AsRef<Path>>(pkg: T, dst: U) -> RelicResult<Path
         defer!(sys::remove_all(&tmpdir).unwrap());
 
         // Copy out the target source in <tmpdir>/trunk/* to dst
-        if let Ok(_) = git::Repo::new(&tmpdir)?.url(url).branch(branch).branch_only(true).clone() {
+        if git::Repo::new(&tmpdir)?.url(url).branch(branch).branch_only(true).clone().is_ok() {
             let dir = sys::mkdir(&dst)?;
             sys::copy(tmpdir.mash("trunk/*"), &dir)?;
             return Ok(dir);
         }
     }
-    Err(RelicError::package_not_found(pkg).into())
+    Err(RelicError::package_not_found(pkg))
 }
 
 // Unit tests

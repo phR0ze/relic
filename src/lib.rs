@@ -1,9 +1,9 @@
 pub mod abs;
-pub mod errors;
+pub mod error;
 
 /// Types exported directly
-pub use crate::errors::RelicError;
-pub use crate::errors::RelicResult;
+pub use crate::error::RelicError;
+pub use crate::error::RelicResult;
 
 // Re-exports
 pub use skellige::fungus;
@@ -18,7 +18,7 @@ pub use skellige::prelude::git;
 /// ```
 pub mod prelude {
     pub use super::abs;
-    pub use super::errors::*;
+    pub use super::error::*;
     pub use super::git2;
     pub use skellige::prelude::*;
 
