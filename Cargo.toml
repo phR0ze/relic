@@ -1,6 +1,6 @@
 [package]
 name = "relic"
-version = "0.0.2"
+version = "0.0.3"
 edition = "2018"
 authors = ["phR0ze"]
 license = "MIT OR Apache-2.0"
@@ -29,6 +29,7 @@ lto = true      # Futher assist in optimization
 opt-level = 0   # Default no optimization
 
 [dependencies]
+skellige = "0.1.4"
 
 # Examples and tests are built with these dependencies
 [dev-dependencies]
