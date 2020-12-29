@@ -1,7 +1,7 @@
 # relic
 [![license-badge](https://img.shields.io/crates/l/fungus.svg)](https://opensource.org/licenses/MIT)
 [![build](https://github.com/phR0ze/relic/workflows/build/badge.svg?branch=main)](https://github.com/phR0ze/relic/actions)
-[![codecov](https://codecov.io/gh/phR0ze/relic/branch/main/graph/badge.svg?token=3KnXWj0qTw)](https://codecov.io/gh/phR0ze/relic)
+[![codecov](https://codecov.io/gh/phR0ze/relic/branch/main/graph/badge.svg?token=LZHXZNZcRR)](https://codecov.io/gh/phR0ze/relic)
 [![crates.io](https://img.shields.io/crates/v/relic.svg)](https://crates.io/crates/relic)
 [![rust-version](https://img.shields.io/badge/rust-latest%20stable-blue.svg)](https://github.com/rust-lang/rust/releases)
 
