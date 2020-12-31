@@ -114,6 +114,7 @@ mod tests {
         assert_eq!("failed to find package: foo", err.to_string());
         assert_eq!("failed to find package: foo", err.as_ref().to_string());
         assert_eq!("failed to find package: foo", err.as_mut().to_string());
+        assert!(err.is::<RelicError>());
         assert!(err.downcast_ref::<RelicError>().is_some());
         assert!(err.downcast_mut::<RelicError>().is_some());
         assert!(err.source().is_none());
@@ -124,6 +125,7 @@ mod tests {
         assert_eq!("failed to find repo: foo", err.to_string());
         assert_eq!("failed to find repo: foo", err.as_ref().to_string());
         assert_eq!("failed to find repo: foo", err.as_mut().to_string());
+        assert!(err.is::<RelicError>());
         assert!(err.downcast_ref::<RelicError>().is_some());
         assert!(err.downcast_mut::<RelicError>().is_some());
         assert!(err.source().is_none());
@@ -133,6 +135,7 @@ mod tests {
         assert_eq!("failed to extract string from file", err.to_string());
         assert_eq!("failed to extract string from file", err.as_ref().to_string());
         assert_eq!("failed to extract string from file", err.as_mut().to_string());
+        assert!(err.is::<FileError>());
         assert!(err.downcast_ref::<FileError>().is_some());
         assert!(err.downcast_mut::<FileError>().is_some());
         assert!(err.source().is_none());
@@ -142,6 +145,7 @@ mod tests {
         assert_eq!("failed to extract string from file", err.to_string());
         assert_eq!("failed to extract string from file", err.as_ref().to_string());
         assert_eq!("failed to extract string from file", err.as_mut().to_string());
+        assert!(err.is::<FileError>());
         assert!(err.downcast_ref::<FileError>().is_some());
         assert!(err.downcast_mut::<FileError>().is_some());
         assert!(err.source().is_none());
@@ -151,6 +155,7 @@ mod tests {
         assert_eq!("foo; class=Checkout (20); code=Ambiguous (-5)", err.to_string());
         assert_eq!("foo; class=Checkout (20); code=Ambiguous (-5)", err.as_ref().to_string());
         assert_eq!("foo; class=Checkout (20); code=Ambiguous (-5)", err.as_mut().to_string());
+        assert!(err.is::<git2::Error>());
         assert!(err.downcast_ref::<git2::Error>().is_some());
         assert!(err.downcast_mut::<git2::Error>().is_some());
         assert!(err.source().is_none());

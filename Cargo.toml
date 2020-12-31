@@ -1,10 +1,10 @@
 [package]
 name = "relic"
-version = "0.0.4"
+version = "0.0.5"
 edition = "2018"
 authors = ["phR0ze"]
 license = "MIT OR Apache-2.0"
-description = "Package management for cyberlinux"
+description = "Package management for Arch Linux"
 readme = "README.md"
 homepage = "https://github.com/phR0ze/relic"
 repository = "https://github.com/phR0ze/relic"
@@ -20,16 +20,28 @@ exclude = [
   ".vscode"
 ]
 
+# Spliting the library from the binary with workspaces allows for a separation of
+# dependencies so the binary dependencies aren't required for the library.
+# path = <dependency> entries in dependencies are automatically included
+[workspace]
+
 # Higher the opt-level value the slower the compile time
 [profile.release]
 opt-level = 3   # Optimize for speed over size
 lto = true      # Futher assist in optimization
+debug = true    # Enable debug symbols for witcher
 
 [profile.dev]
 opt-level = 0   # Default no optimization
 
 [dependencies]
-skellige = "0.1.4"
+witcher = "0.1.19"
+librelic = { path = "librelic" }
+clap = { version = "2.33", default-features = false, features = ["suggestions"] }
 
 # Examples and tests are built with these dependencies
 [dev-dependencies]
+
+# build.rs is built with these dependencies
+[build-dependencies]
+chrono = "0.4"

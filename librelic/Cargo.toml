@@ -1,0 +1,27 @@
+[package]
+name = "librelic"
+version = "0.0.5"
+edition = "2018"
+authors = ["phR0ze"]
+license = "MIT OR Apache-2.0"
+description = "Package management library for Arch Linux"
+readme = "README.md"
+homepage = "https://github.com/phR0ze/relic"
+repository = "https://github.com/phR0ze/relic"
+exclude = [
+  "docs",
+  "examples",
+  ".git",
+  ".githooks",
+  ".github",
+  "tests",
+  "benches",
+  "target",
+  ".vscode"
+]
+
+[dependencies]
+skellige = "0.1.6"
+
+# Examples and tests are built with these dependencies
+[dev-dependencies]

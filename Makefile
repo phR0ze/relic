@@ -4,7 +4,7 @@ EXAMPLES := ${shell ls examples}
 build:
 	@echo "Building locally..."
 	@echo "------------------------------------------------------------------------"
-	cargo build --all-features
+	cargo build --all
 
 examples:
 	@echo "Building all examples..."
@@ -17,7 +17,7 @@ examples:
 test:
 	@echo "Testing..."
 	@echo "------------------------------------------------------------------------"
-	cargo test --all-features
+	cargo test --all
 
 lint:
 	@echo "Running clippy..."

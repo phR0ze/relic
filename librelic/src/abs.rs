@@ -1,18 +1,13 @@
 // Arch Linux Build System (ABS)
 //
-// https://wiki.archlinux.org/index.php/Arch_Build_System
-// https://wiki.archlinux.org/index.php/Arch_Build_System#Retrieve_PKGBUILD_source_using_Git
-// https://www.archlinux.org/pacman/
-// https://git.archlinux.org/pacman.git/tree/
-// https://wiki.archlinux.org/index.php/pacman
-// https://users.rust-lang.org/t/half-baked-alpm-arch-linux-package-manager-implementation/18969
 use crate::error::*;
 use skellige::prelude::*;
 
 const TMPDIR: &str = "abs";
-const REPO_PACKAGES_NAME: &str = "packages";
-const REPO_COMMUNITY_NAME: &str = "community";
 const REPO_BASE: &str = "https://git.archlinux.org/svntogit";
+
+pub const PACKAGES: &str = "packages";
+pub const COMMUNITY: &str = "community";
 
 // An repo identifier
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -24,11 +19,12 @@ pub enum Repo {
     Community,
 }
 impl Repo {
-    pub fn from<T: AsRef<str>>(repo: T) -> RelicResult<Repo> {
+    // Convert a string type into a Repo enum
+    fn from<T: AsRef<str>>(repo: T) -> RelicResult<Repo> {
         match repo.as_ref() {
-            REPO_PACKAGES_NAME => Ok(Repo::Packages),
-            REPO_COMMUNITY_NAME => Ok(Repo::Community),
-            _ => Err(RelicError::repo_not_found(repo.as_ref().to_string())),
+            PACKAGES => Ok(Repo::Packages),
+            COMMUNITY => Ok(Repo::Community),
+            _ => Err(RelicError::repo_not_found(repo.as_ref())),
         }
     }
 }
@@ -45,7 +41,7 @@ pub fn kernel_ver() -> RelicResult<String> {
     // Download source to tmpdir
     let tmpdir = user::temp_dir(TMPDIR)?;
     defer!(sys::remove_all(&tmpdir).unwrap());
-    let src = source("linux", &tmpdir)?;
+    let src = download("linux", &tmpdir)?;
 
     // Extract the kernel version
     lazy_static! {
@@ -54,16 +50,16 @@ pub fn kernel_ver() -> RelicResult<String> {
     Ok(sys::extract_string(src.mash("PKGBUILD"), &RX)?)
 }
 
-/// Get the repo the given `pkg` lives in.
+/// Find the repo the given `pkg` lives in.
 ///
 /// ### Examples
 /// ```
 /// use relic::prelude::*;
 ///
-/// assert_eq!(abs::repo("pkgfile").unwrap(), abs::Repo::Packages);
+/// assert_eq!(abs::find("pkgfile").unwrap(), abs::Repo::Packages);
 /// ```
-pub fn repo<T: AsRef<str>>(pkg: T) -> RelicResult<Repo> {
-    for name in &vec![REPO_PACKAGES_NAME, REPO_COMMUNITY_NAME] {
+pub fn find<T: AsRef<str>>(pkg: T) -> RelicResult<Repo> {
+    for name in &vec![PACKAGES, COMMUNITY] {
         let url = format!("{}/{}.git", REPO_BASE, name);
         let branch = format!("packages/{}", pkg.as_ref());
         if git::remote_branch_exists(url, branch).is_ok() {
@@ -83,14 +79,14 @@ pub fn repo<T: AsRef<str>>(pkg: T) -> RelicResult<Repo> {
 /// assert!(sys::remove_all(&tmpdir).is_ok());
 /// assert!(sys::mkdir(&tmpdir).is_ok());
 ///
-/// assert!(abs::source("pkgfile", &tmpdir).is_ok());
+/// assert!(abs::download("pkgfile", &tmpdir).is_ok());
 /// assert_eq!(tmpdir.is_dir(), true);
 /// assert_eq!(tmpdir.mash("PKGBUILD").exists(), true);
 ///
 /// assert!(sys::remove_all(&tmpdir).is_ok());
 /// ```
-pub fn source<T: AsRef<str>, U: AsRef<Path>>(pkg: T, dst: U) -> RelicResult<PathBuf> {
-    for name in &vec![REPO_PACKAGES_NAME, REPO_COMMUNITY_NAME] {
+pub fn download<T: AsRef<str>, U: AsRef<Path>>(pkg: T, dst: U) -> RelicResult<PathBuf> {
+    for name in &vec![PACKAGES, COMMUNITY] {
         let url = format!("{}/{}.git", REPO_BASE, name);
         let branch = format!("packages/{}", pkg.as_ref());
 
@@ -143,10 +139,11 @@ mod tests {
 
     #[test]
     fn test_repo() {
-        assert!(abs::repo("foobar").is_err());
-        assert_eq!(abs::repo("pkgfile").unwrap(), abs::Repo::Packages);
-        assert_eq!(abs::repo("acme").unwrap(), abs::Repo::Community);
-        assert_eq!(abs::repo("linux").unwrap(), abs::Repo::Packages);
+        assert!(abs::find("foobar").is_err());
+        assert!(abs::Repo::from("foobar").is_err());
+        assert_eq!(abs::find("pkgfile").unwrap(), abs::Repo::Packages);
+        assert_eq!(abs::find("acme").unwrap(), abs::Repo::Community);
+        assert_eq!(abs::find("linux").unwrap(), abs::Repo::Packages);
     }
 
     #[test]
@@ -154,10 +151,10 @@ mod tests {
         let tmpdir = setup("abs_source");
         assert!(sys::remove_all(&tmpdir).is_ok());
 
-        assert!(abs::source("pkgfile", &tmpdir).is_ok());
+        assert!(abs::download("pkgfile", &tmpdir).is_ok());
         assert_eq!(tmpdir.is_dir(), true);
         assert_eq!(tmpdir.mash("PKGBUILD").exists(), true);
-        assert!(abs::source("foobar", &tmpdir).is_err());
+        assert!(abs::download("foobar", &tmpdir).is_err());
 
         assert!(sys::remove_all(&tmpdir).is_ok());
     }
