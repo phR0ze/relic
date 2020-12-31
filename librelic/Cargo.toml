@@ -1,6 +1,6 @@
 [package]
 name = "librelic"
-version = "0.0.6"
+version = "0.0.7"
 edition = "2018"
 authors = ["phR0ze"]
 license = "MIT OR Apache-2.0"
@@ -21,7 +21,14 @@ exclude = [
 ]
 
 [dependencies]
-skellige = "0.1.6"
+skellige = "0.1.7"
+fungus = "0.1.18"
+serde_yaml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
 
 # Examples and tests are built with these dependencies
 [dev-dependencies]
+
+# build.rs is built with these dependencies
+[build-dependencies]
+chrono = "0.4"

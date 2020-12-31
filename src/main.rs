@@ -8,12 +8,6 @@ use librelic::prelude::*;
 use std::{env, ffi::OsString};
 use witcher::prelude::*;
 
-pub const APP_NAME: &'static str = "RELIC";
-pub const APP_VERSION: &'static str = env!("CARGO_PKG_VERSION");
-pub const APP_DESCRIPTION: &'static str = env!("CARGO_PKG_DESCRIPTION");
-pub const APP_GIT_COMMIT: &'static str = env!("APP_GIT_COMMIT");
-pub const APP_BUILD_DATE: &'static str = env!("APP_BUILD_DATE");
-
 /// CLI providers a command line interface for librelic
 #[derive(Debug, PartialEq)]
 struct CLI;

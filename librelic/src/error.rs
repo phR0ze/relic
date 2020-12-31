@@ -1,5 +1,5 @@
 use skellige::{fungus::errors::*, prelude::git};
-use std::{error::Error as StdError, fmt};
+use std::{error::Error as StdError, fmt, io};
 
 /// `Result<T>` provides a simplified result type with a common error type
 pub type RelicResult<T> = std::result::Result<T, RelicError>;
@@ -7,16 +7,22 @@ pub type RelicResult<T> = std::result::Result<T, RelicError>;
 // An error indicating that something went wrong with an arch linux operation
 #[derive(Debug)]
 pub enum RelicError {
+    // std::io::Error from lower down
+    Io(io::Error),
+
     /// An error indicating that the given package was not found.
     PackageNotFound(String),
 
     /// An error indicating that the given repo was not found.
     RepoNotFound(String),
 
-    /// An error from fungus which might contain more errors
+    /// An error from the fungus crate
     Fungus(FuError),
 
-    /// An error from fungus which might contain more errors
+    // An error from the serde_yaml crate
+    SerdeYaml(serde_yaml::Error),
+
+    /// An error from the skellige crate
     Skellige(git::Error),
 }
 impl RelicError {
@@ -56,9 +62,11 @@ impl StdError for RelicError {}
 impl fmt::Display for RelicError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
+            RelicError::Io(ref err) => write!(f, "{}", err),
             RelicError::PackageNotFound(ref pkg) => write!(f, "failed to find package: {}", pkg),
             RelicError::RepoNotFound(ref repo) => write!(f, "failed to find repo: {}", repo),
             RelicError::Fungus(ref err) => write!(f, "{}", err),
+            RelicError::SerdeYaml(ref err) => write!(f, "{}", err),
             RelicError::Skellige(ref err) => write!(f, "{}", err),
         }
     }
@@ -67,10 +75,12 @@ impl fmt::Display for RelicError {
 impl AsRef<dyn StdError> for RelicError {
     fn as_ref(&self) -> &(dyn StdError+'static) {
         match *self {
+            RelicError::Io(ref err) => err,
             RelicError::PackageNotFound(_) => self,
             RelicError::RepoNotFound(_) => self,
             // Call as_ref on inner to make transparent
             RelicError::Fungus(ref err) => err.as_ref(),
+            RelicError::SerdeYaml(ref err) => err as &(dyn StdError+'static),
             RelicError::Skellige(ref err) => err.as_ref(),
         }
     }
@@ -79,12 +89,20 @@ impl AsRef<dyn StdError> for RelicError {
 impl AsMut<dyn StdError> for RelicError {
     fn as_mut(&mut self) -> &mut (dyn StdError+'static) {
         match *self {
+            RelicError::Io(ref mut err) => err,
             RelicError::PackageNotFound(_) => self,
             RelicError::RepoNotFound(_) => self,
             // Call as_ref on inner to make transparent
             RelicError::Fungus(ref mut err) => err.as_mut(),
+            RelicError::SerdeYaml(ref mut err) => err as &mut (dyn StdError+'static),
             RelicError::Skellige(ref mut err) => err.as_mut(),
         }
+    }
+}
+
+impl From<io::Error> for RelicError {
+    fn from(err: io::Error) -> RelicError {
+        RelicError::Io(err)
     }
 }
 
@@ -97,6 +115,12 @@ impl From<FuError> for RelicError {
 impl From<git::Error> for RelicError {
     fn from(err: git::Error) -> RelicError {
         RelicError::Skellige(err)
+    }
+}
+
+impl From<serde_yaml::Error> for RelicError {
+    fn from(err: serde_yaml::Error) -> RelicError {
+        RelicError::SerdeYaml(err)
     }
 }
 
