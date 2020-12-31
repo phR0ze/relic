@@ -1,4 +1,4 @@
-//! `cli` provides Arch Linux build and package automation
+//! `relic` provides Arch Linux build and package automation
 //!
 //! ## About
 //!
@@ -8,21 +8,21 @@ use librelic::prelude::*;
 use std::{env, ffi::OsString};
 use witcher::prelude::*;
 
-pub const APP_NAME:&'static str = "relic";
-pub const APP_VERSION:&'static str = env!("CARGO_PKG_VERSION");
-pub const APP_DESCRIPTION:&'static str = env!("CARGO_PKG_DESCRIPTION");
-pub const APP_GIT_COMMIT:&'static str = env!("APP_GIT_COMMIT");
-pub const APP_BUILD_DATE:&'static str = env!("APP_BUILD_DATE");
+pub const APP_NAME: &'static str = "RELIC";
+pub const APP_VERSION: &'static str = env!("CARGO_PKG_VERSION");
+pub const APP_DESCRIPTION: &'static str = env!("CARGO_PKG_DESCRIPTION");
+pub const APP_GIT_COMMIT: &'static str = env!("APP_GIT_COMMIT");
+pub const APP_BUILD_DATE: &'static str = env!("APP_BUILD_DATE");
 
-/// CLI provides an abstraction layer for testing the cli
+/// CLI providers a command line interface for librelic
 #[derive(Debug, PartialEq)]
-struct CLI {}
-impl CLI
-{
+struct CLI;
+impl CLI {
     /// Create a new instance of the cli with the given arguments
-    pub fn new<T, U>(args:T) -> Result<Self>
-        where T: Iterator<Item = U>,
-              U: Into<OsString> + Clone
+    pub fn new<T, U>(args: T) -> Result<Self>
+    where
+        T: Iterator<Item=U>,
+        U: Into<OsString>+Clone,
     {
         // About strings
         let info_about = r"View package information
@@ -49,58 +49,68 @@ Examples:
             .version(&format!("v{}", APP_VERSION)[..])
             .about(APP_DESCRIPTION)
             .setting(AppSettings::SubcommandRequiredElseHelp)
-
             // Global arguments
             // -----------------------------------------------------------------------------------------
             .arg(Arg::with_name("test").short("t").long("test").help("Enable test mode"))
             .arg(Arg::with_name("debug").short("d").long("debug").help("Enable debug logging"))
             .arg(Arg::with_name("quiet").short("q").long("quiet").help("Disable all logging"))
-
             .arg(Arg::with_name("files").short("F").long("files").help("Use the files database"))
             .arg(Arg::with_name("query").short("Q").long("query").help("Use the local database"))
             .arg(Arg::with_name("sync").short("S").long("sync").help("Use the sync database"))
-
             // log-level - configures the log level to use
-            .arg(Arg::with_name("loglevel").long("log-level").value_name("NAME").takes_value(true)
-                .help("Sets the log level [error|warn|info|debug|trace] [default: info]"))
-
+            .arg(
+                Arg::with_name("loglevel")
+                    .long("log-level")
+                    .value_name("NAME")
+                    .takes_value(true)
+                    .help("Sets the log level [error|warn|info|debug|trace] [default: info]"),
+            )
             // config-dir - is where mrsa persists its configuration
-            .arg(Arg::with_name("config_dir").long("config-dir").value_name("PATH").takes_value(true)
-                .help("Sets the config directory [default: $XDG_CONFIG_HOME/mrsa]"))
-
+            .arg(
+                Arg::with_name("config_dir")
+                    .long("config-dir")
+                    .value_name("PATH")
+                    .takes_value(true)
+                    .help("Sets the config directory [default: $XDG_CONFIG_HOME/mrsa]"),
+            )
             // data-dir - is where all repos are downloaded and all work is done
-            .arg(Arg::with_name("data_dir").long("data-dir").value_name("PATH").takes_value(true)
-                .help("Sets the data directory [default: $XDG_DATA_HOME/mrsa]"))
-
+            .arg(Arg::with_name("data_dir").long("data-dir").value_name("PATH").takes_value(true).help("Sets the data directory [default: $XDG_DATA_HOME/mrsa]"))
             // Version command
             // -----------------------------------------------------------------------------------------
             .subcommand(SubCommand::with_name("version").alias("v").alias("ver").about("Print version information"))
-
             // Use command
             // -----------------------------------------------------------------------------------------
-            .subcommand(SubCommand::with_name("use").about("Persist configuration across runs").long_about(use_about)
-                .subcommand(SubCommand::with_name("profile").about("Use the given profile and persist the change")
-                    .arg(Arg::with_name("profile_arg").index(1).required(true).value_names(&["NAME/PATH"])
-                        .help("Profile name or path to use and persist"))),
+            .subcommand(
+                SubCommand::with_name("use").about("Persist configuration across runs").long_about(use_about).subcommand(
+                    SubCommand::with_name("profile")
+                        .about("Use the given profile and persist the change")
+                        .arg(Arg::with_name("profile_arg").index(1).required(true).value_names(&["NAME/PATH"]).help("Profile name or path to use and persist")),
+                ),
             )
-
             // Info command
             // -----------------------------------------------------------------------------------------
-            .subcommand(SubCommand::with_name("info").about("View package information").long_about(info_about)
-                .arg(Arg::with_name("info_args").index(1).required(true).value_names(&["PACKAGE"])
-                    .multiple(true).help("Package names to view information about")),
+            .subcommand(
+                SubCommand::with_name("info")
+                    .about("View package information")
+                    .long_about(info_about)
+                    .arg(Arg::with_name("info_args").index(1).required(true).value_names(&["PACKAGE"]).multiple(true).help("Package names to view information about")),
             )
-
             // Remove command
             // -----------------------------------------------------------------------------------------
-            .subcommand(SubCommand::with_name("remove").alias("rm").about("Remove various mrsa components")
-                .subcommand(SubCommand::with_name("config").about("Remove the persisted configuration"))
-                    .subcommand(SubCommand::with_name("repos").alias("repo").about("Remove indicated locally cloned repos")
-                        .arg(Arg::with_name("repos_arg").index(1).required(true).value_names(&["all, aur, boot, config, profiles"])
-                            .multiple(true).help("Repo name/s to remove"))),
+            .subcommand(
+                SubCommand::with_name("remove")
+                    .alias("rm")
+                    .about("Remove various mrsa components")
+                    .subcommand(SubCommand::with_name("config").about("Remove the persisted configuration"))
+                    .subcommand(
+                        SubCommand::with_name("repos")
+                            .alias("repo")
+                            .about("Remove indicated locally cloned repos")
+                            .arg(Arg::with_name("repos_arg").index(1).required(true).value_names(&["all, aur, boot, config, profiles"]).multiple(true).help("Repo name/s to remove")),
+                    ),
             )
-
-            .get_matches_from_safe(args).pass()?;
+            .get_matches_from_safe(args)
+            .pass()?;
 
         // Set incoming arguments
         // ---------------------------------------------------------------------------------------------
@@ -128,8 +138,8 @@ Examples:
         // Execute version
         // ---------------------------------------------------------------------------------------------
         if let Some(ref _matches) = matches.subcommand_matches("version") {
-            println!("{} CLI - {}", APP_NAME, APP_DESCRIPTION);
-            println!("{:->w$}", "-", w = 60);
+            println!("{}: {}", APP_NAME.cyan(), APP_DESCRIPTION.cyan());
+            println!("{}", "--------------------------------------------------------".cyan());
             println!("{:<w$} {}", "Version:", APP_VERSION, w = 18);
             println!("{:<w$} {}", "Build Date:", APP_BUILD_DATE, w = 18);
             println!("{:<w$} {}", "Git Commit:", APP_GIT_COMMIT, w = 18);
@@ -173,13 +183,11 @@ Examples:
         //     mrsa.remove(components)?;
         // }
 
-        //Ok(Self {})
-        bail!("failed");
+        Ok(Self)
     }
 }
 
-fn main()
-{
+fn main() {
     match CLI::new(env::args_os().into_iter()) {
         Ok(_) => 0,
         Err(err) => {
@@ -188,6 +196,6 @@ fn main()
                 None => println!("{:?}", err),
             };
             1
-        }
+        },
     };
 }

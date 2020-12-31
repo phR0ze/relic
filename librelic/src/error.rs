@@ -1,7 +1,5 @@
-use skellige::fungus::errors::*;
-use skellige::prelude::git;
-use std::error::Error as StdError;
-use std::fmt;
+use skellige::{fungus::errors::*, prelude::git};
+use std::{error::Error as StdError, fmt};
 
 /// `Result<T>` provides a simplified result type with a common error type
 pub type RelicResult<T> = std::result::Result<T, RelicError>;
@@ -33,23 +31,23 @@ impl RelicError {
     }
 
     /// Implemented directly on the `Error` type to reduce casting required
-    pub fn is<T: StdError + 'static>(&self) -> bool {
+    pub fn is<T: StdError+'static>(&self) -> bool {
         self.as_ref().is::<T>()
     }
 
     /// Implemented directly on the `Error` type to reduce casting required
-    pub fn downcast_ref<T: StdError + 'static>(&self) -> Option<&T> {
+    pub fn downcast_ref<T: StdError+'static>(&self) -> Option<&T> {
         self.as_ref().downcast_ref::<T>()
     }
 
     /// Implemented directly on the `Error` type to reduce casting required
-    pub fn downcast_mut<T: StdError + 'static>(&mut self) -> Option<&mut T> {
+    pub fn downcast_mut<T: StdError+'static>(&mut self) -> Option<&mut T> {
         self.as_mut().downcast_mut::<T>()
     }
 
     /// Implemented directly on the `Error` type to reduce casting required
     /// which allows for using as_ref to get the correct pass through.
-    pub fn source(&self) -> Option<&(dyn StdError + 'static)> {
+    pub fn source(&self) -> Option<&(dyn StdError+'static)> {
         self.as_ref().source()
     }
 }
@@ -67,7 +65,7 @@ impl fmt::Display for RelicError {
 }
 
 impl AsRef<dyn StdError> for RelicError {
-    fn as_ref(&self) -> &(dyn StdError + 'static) {
+    fn as_ref(&self) -> &(dyn StdError+'static) {
         match *self {
             RelicError::PackageNotFound(_) => self,
             RelicError::RepoNotFound(_) => self,
@@ -79,7 +77,7 @@ impl AsRef<dyn StdError> for RelicError {
 }
 
 impl AsMut<dyn StdError> for RelicError {
-    fn as_mut(&mut self) -> &mut (dyn StdError + 'static) {
+    fn as_mut(&mut self) -> &mut (dyn StdError+'static) {
         match *self {
             RelicError::PackageNotFound(_) => self,
             RelicError::RepoNotFound(_) => self,

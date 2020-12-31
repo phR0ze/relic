@@ -6,9 +6,7 @@ pub use crate::error::RelicError;
 pub use crate::error::RelicResult;
 
 // Re-exports
-pub use skellige::fungus;
-pub use skellige::git2;
-pub use skellige::prelude::git;
+pub use skellige::{fungus, git2, prelude::git};
 
 /// All essential symbols in a simple consumable way
 ///
@@ -17,9 +15,7 @@ pub use skellige::prelude::git;
 /// use relic::prelude::*;
 /// ```
 pub mod prelude {
-    pub use super::abs;
-    pub use super::error::*;
-    pub use super::git2;
+    pub use super::{abs, error::*, git2};
     pub use skellige::prelude::*;
 
     // Re-exports
