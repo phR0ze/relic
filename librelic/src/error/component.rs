@@ -23,6 +23,6 @@ mod tests {
 
     #[test]
     fn test_errors() {
-        assert_eq!("failed to convert value to string", format!("{}", ComponentError::InvalidName));
+        assert_eq!("invalid component name was given", format!("{}", ComponentError::InvalidName));
     }
 }

@@ -33,7 +33,7 @@ impl Repo {
 ///
 /// ### Examples
 /// ```
-/// use relic::prelude::*;
+/// use librelic::prelude::*;
 ///
 /// println!("current linux kernel version: {:?}", abs::kernel_ver().unwrap());
 /// ```
@@ -54,7 +54,7 @@ pub fn kernel_ver() -> RelicResult<String> {
 ///
 /// ### Examples
 /// ```
-/// use relic::prelude::*;
+/// use librelic::prelude::*;
 ///
 /// assert_eq!(abs::find("pkgfile").unwrap(), abs::Repo::Packages);
 /// ```
@@ -73,7 +73,7 @@ pub fn find<T: AsRef<str>>(pkg: T) -> RelicResult<Repo> {
 ///
 /// ### Examples
 /// ```
-/// use relic::prelude::*;
+/// use librelic::prelude::*;
 ///
 /// let tmpdir = PathBuf::from("tests/temp").abs().unwrap().mash("abs_soure_doc");
 /// assert!(sys::remove_all(&tmpdir).is_ok());
