@@ -3,7 +3,7 @@
 [![build](https://github.com/phR0ze/relic/workflows/build/badge.svg?branch=main)](https://github.com/phR0ze/relic/actions)
 [![codecov](https://codecov.io/gh/phR0ze/relic/branch/main/graph/badge.svg?token=LZHXZNZcRR)](https://codecov.io/gh/phR0ze/relic)
 [![crates.io](https://img.shields.io/crates/v/relic.svg)](https://crates.io/crates/relic)
-[![Minimum rustc](https://img.shields.io/badge/rustc-1.30+-lightgray.svg)](https://github.com/phR0ze/gory#rustc-requirements)
+[![Minimum rustc](https://img.shields.io/badge/rustc-1.42+-lightgray.svg)](https://github.com/phR0ze/gory#rustc-requirements)
 
 ***Package management for the Arch Linux packaging ecosystem***
 
@@ -27,12 +27,9 @@
 
 ## Usage <a name="usage"/></a>
 
-#### Requires rustc >= 1.30 <a name="rustc-requirements"/></a>
-This minimum rustc requirement is driven by the enhancements made to [Rust's `std::error::Error`
-handling improvements](https://doc.rust-lang.org/std/error/trait.Error.html#method.source)
-
-TBD
-
+#### Requires rustc >= 1.42 <a name="rustc-requirements"/></a>
+This minimum rustc requirement is driven by the
+[tracing\_subscriber](https://docs.rs/tracing-subscriber/0.2.15/tracing_subscriber) requirements
 
 ## Research <a name="research"/></a>
 Collecting the research done while developing this project here.

@@ -6,6 +6,8 @@
 use clap::{App, AppSettings, Arg, SubCommand};
 use librelic::prelude::*;
 use std::{env, ffi::OsString};
+use tracing::Level;
+use tracing_subscriber;
 use witcher::prelude::*;
 
 /// CLI providers a command line interface for librelic
@@ -24,7 +26,7 @@ impl CLI {
 Examples:
 
   # View package info for the 'linux' package
-  mrsa info linux
+  relic info linux
 ";
 
         let use_about = r"Persist configuration across runs
@@ -32,10 +34,10 @@ Examples:
 Examples:
 
   # Use and persist the 'base' profile
-  mrsa use profile base
+  relic use profile base
 
   # Use and persist a custom profile '~/foo.yaml'
-  mrsa use profile ~/foo.yaml
+  relic use profile ~/foo.yaml
 ";
 
         // Parse cli args
@@ -45,12 +47,12 @@ Examples:
             .setting(AppSettings::SubcommandRequiredElseHelp)
             // Global arguments
             // -----------------------------------------------------------------------------------------
-            .arg(Arg::with_name("test").short("t").long("test").help("Enable test mode"))
-            .arg(Arg::with_name("debug").short("d").long("debug").help("Enable debug logging"))
-            .arg(Arg::with_name("quiet").short("q").long("quiet").help("Disable all logging"))
-            .arg(Arg::with_name("files").short("F").long("files").help("Use the files database"))
-            .arg(Arg::with_name("query").short("Q").long("query").help("Use the local database"))
-            .arg(Arg::with_name("sync").short("S").long("sync").help("Use the sync database"))
+            .arg(Arg::with_name("test").short("t").long("test").takes_value(false).help("Enable test mode"))
+            .arg(Arg::with_name("debug").short("d").long("debug").takes_value(false).help("Enable debug logging"))
+            .arg(Arg::with_name("quiet").short("q").long("quiet").takes_value(false).help("Disable all logging"))
+            .arg(Arg::with_name("files").short("F").long("files").takes_value(false).help("Use the files database"))
+            .arg(Arg::with_name("query").short("Q").long("query").takes_value(false).help("Use the local database"))
+            .arg(Arg::with_name("sync").short("S").long("sync").takes_value(false).help("Use the sync database"))
             // log-level - configures the log level to use
             .arg(
                 Arg::with_name("loglevel")
@@ -59,16 +61,16 @@ Examples:
                     .takes_value(true)
                     .help("Sets the log level [error|warn|info|debug|trace] [default: info]"),
             )
-            // config-dir - is where mrsa persists its configuration
+            // config-dir - is where relic persists its configuration
             .arg(
                 Arg::with_name("config_dir")
                     .long("config-dir")
                     .value_name("PATH")
                     .takes_value(true)
-                    .help("Sets the config directory [default: $XDG_CONFIG_HOME/mrsa]"),
+                    .help("Sets the config directory [default: $XDG_CONFIG_HOME/relic]"),
             )
             // data-dir - is where all repos are downloaded and all work is done
-            .arg(Arg::with_name("data_dir").long("data-dir").value_name("PATH").takes_value(true).help("Sets the data directory [default: $XDG_DATA_HOME/mrsa]"))
+            .arg(Arg::with_name("data_dir").long("data-dir").value_name("PATH").takes_value(true).help("Sets the data directory [default: $XDG_DATA_HOME/relic]"))
             // Version command
             // -----------------------------------------------------------------------------------------
             .subcommand(SubCommand::with_name("version").alias("v").alias("ver").about("Print version information"))
@@ -94,7 +96,7 @@ Examples:
             .subcommand(
                 SubCommand::with_name("remove")
                     .alias("rm")
-                    .about("Remove various mrsa components")
+                    .about("Remove various relic components")
                     .subcommand(SubCommand::with_name("config").about("Remove the persisted configuration"))
                     .subcommand(
                         SubCommand::with_name("repos")
@@ -106,28 +108,28 @@ Examples:
             .get_matches_from_safe(args)
             .pass()?;
 
-        // Set incoming arguments
+        // Initialize relic
         // ---------------------------------------------------------------------------------------------
-        // let mut mrsa = MRSA::new();
-        // if matches.is_present("loglevel") {
-        //     mrsa.loglevel_str(matches.value_of("loglevel").unwrap()); // call loglevel first to let debug
-        // override
-        // }
-        // if matches.is_present("config_dir") {
-        //     mrsa.config_dir(matches.value_of("config_dir").unwrap())?;
-        // }
-        // if matches.is_present("data_dir") {
-        //     mrsa.data_dir(matches.value_of("data_dir").unwrap())?;
-        // }
-        // if matches.is_present("debug") {
-        //     mrsa.debug(matches.value_of("debug").unwrap().to_lowercase().parse()?);
-        // }
-        // if matches.is_present("quiet") {
-        //     mrsa.quiet(matches.value_of("quiet").unwrap().to_lowercase().parse()?);
-        // }
-        // if matches.is_present("test") {
-        //     mrsa.test(matches.value_of("test").unwrap().to_lowercase().parse()?);
-        // }
+
+        // Configure logging
+        let loglevel = match env::var("LOG_LEVEL") {
+            Ok(val) => val.parse().unwrap_or(Level::INFO),
+            Err(_e) => Level::INFO,
+        };
+        tracing_subscriber::fmt()
+            .with_max_level(loglevel)
+            //.json() // uncomment this line to convert it into json output
+            .init();
+
+        // Configure relic
+        let mut relic = Relic::new()
+            .with_config_dir(matches.value_of("config_dir"))
+            .wrap("failed to set relic's 'config_dir' option")?
+            .with_data_dir(matches.value_of("data_dir"))
+            .wrap("failed to set relic's 'data_dir' option")?
+            .with_debug(matches.is_present("debug"))
+            .with_quiet(matches.is_present("quiet"))
+            .with_test(matches.is_present("test"));
 
         // Execute version
         // ---------------------------------------------------------------------------------------------
@@ -137,6 +139,8 @@ Examples:
             println!("{:<w$} {}", "Version:", APP_VERSION, w = 18);
             println!("{:<w$} {}", "Build Date:", APP_BUILD_DATE, w = 18);
             println!("{:<w$} {}", "Git Commit:", APP_GIT_COMMIT, w = 18);
+        } else {
+            relic.init().wrap("failed to initialize relic")?;
         }
 
         // // Execute use command before initializing to to update config first
@@ -149,14 +153,14 @@ Examples:
         // // Execute info
         // // ---------------------------------------------------------------------------------------------
         // if let Some(ref args) = matches.subcommand_matches("info") {
-        //     mrsa.init()?;
+        //     relic.init()?;
         //     let pkgs = args.values_of_lossy("info_args").unwrap();
-        //     mrsa.info(&pkgs)?;
+        //     relic.info(&pkgs)?;
 
         //     // match matches.subcommand() {
         //     //     ("info", Some(args)) => {
         //     //         let pkgs = args.values_of_lossy("info_args").unwrap();
-        //     //         mrsa.info(&pkgs)?;
+        //     //         relic.info(&pkgs)?;
         //     //     }
         //     //     _ => fatal!("No sub-command specified\n{}", matches.usage()),
         //     // }
@@ -165,7 +169,7 @@ Examples:
         // // Execute remove
         // // ---------------------------------------------------------------------------------------------
         // if let Some(ref matches) = matches.subcommand_matches("remove") {
-        //     mrsa.init()?;
+        //     relic.init()?;
         //     let mut components = Vec::new();
         //     match matches.subcommand() {
         //         ("config", Some(_)) => {
@@ -174,7 +178,7 @@ Examples:
         //         _ => unreachable!(),
         //     }
 
-        //     mrsa.remove(components)?;
+        //     relic.remove(components)?;
         // }
 
         Ok(Self)

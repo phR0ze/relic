@@ -1,3 +1,4 @@
+use crate::error::ComponentError;
 use skellige::{fungus::errors::*, prelude::git};
 use std::{error::Error as StdError, fmt, io};
 
@@ -7,6 +8,9 @@ pub type RelicResult<T> = std::result::Result<T, RelicError>;
 // An error indicating that something went wrong with an arch linux operation
 #[derive(Debug)]
 pub enum RelicError {
+    // An error from the component module
+    Component(ComponentError),
+
     // std::io::Error from lower down
     Io(io::Error),
 
@@ -62,6 +66,7 @@ impl StdError for RelicError {}
 impl fmt::Display for RelicError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
+            RelicError::Component(ref err) => write!(f, "{}", err),
             RelicError::Io(ref err) => write!(f, "{}", err),
             RelicError::PackageNotFound(ref pkg) => write!(f, "failed to find package: {}", pkg),
             RelicError::RepoNotFound(ref repo) => write!(f, "failed to find repo: {}", repo),
@@ -75,6 +80,7 @@ impl fmt::Display for RelicError {
 impl AsRef<dyn StdError> for RelicError {
     fn as_ref(&self) -> &(dyn StdError+'static) {
         match *self {
+            RelicError::Component(ref err) => err,
             RelicError::Io(ref err) => err,
             RelicError::PackageNotFound(_) => self,
             RelicError::RepoNotFound(_) => self,
@@ -89,6 +95,7 @@ impl AsRef<dyn StdError> for RelicError {
 impl AsMut<dyn StdError> for RelicError {
     fn as_mut(&mut self) -> &mut (dyn StdError+'static) {
         match *self {
+            RelicError::Component(ref mut err) => err,
             RelicError::Io(ref mut err) => err,
             RelicError::PackageNotFound(_) => self,
             RelicError::RepoNotFound(_) => self,
@@ -97,6 +104,12 @@ impl AsMut<dyn StdError> for RelicError {
             RelicError::SerdeYaml(ref mut err) => err as &mut (dyn StdError+'static),
             RelicError::Skellige(ref mut err) => err.as_mut(),
         }
+    }
+}
+
+impl From<ComponentError> for RelicError {
+    fn from(err: ComponentError) -> RelicError {
+        RelicError::Component(err)
     }
 }
 

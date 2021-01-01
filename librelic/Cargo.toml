@@ -21,8 +21,9 @@ exclude = [
 ]
 
 [dependencies]
+log = "0.4"
 skellige = "0.1.7"
-fungus = "0.1.18"
+fungus = "0.1.19"
 serde_yaml = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 
