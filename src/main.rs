@@ -3,11 +3,10 @@
 //! ## About
 //!
 //! `relic` provides Arch Linux build and package automation
+mod logger;
 use clap::{App, AppSettings, Arg, SubCommand};
 use librelic::prelude::*;
 use std::{env, ffi::OsString};
-use tracing::Level;
-use tracing_subscriber;
 use witcher::prelude::*;
 
 /// CLI providers a command line interface for librelic
@@ -110,16 +109,7 @@ Examples:
 
         // Initialize relic
         // ---------------------------------------------------------------------------------------------
-
-        // Configure logging
-        let loglevel = match env::var("LOG_LEVEL") {
-            Ok(val) => val.parse().unwrap_or(Level::INFO),
-            Err(_e) => Level::INFO,
-        };
-        tracing_subscriber::fmt()
-            .with_max_level(loglevel)
-            //.json() // uncomment this line to convert it into json output
-            .init();
+        logger::init();
 
         // Configure relic
         let mut relic = Relic::new()

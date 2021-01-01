@@ -4,7 +4,7 @@
 //!
 //! `relic` provides Arch Linux build and package automation
 use crate::{error::*, model::*};
-use log::{debug, error, info, trace, warn, Level};
+use log::info;
 use skellige::prelude::*;
 use std::{cell::RefCell, fmt, rc::Rc};
 
@@ -165,7 +165,7 @@ impl Relic {
 
     // Load the current configuration
     pub(crate) fn load_config(&mut self) -> RelicResult<()> {
-        info!("{}", "Loading configuration".yellow());
+        info!("{}", "Loading configuration...".yellow());
 
         // Config dir by default is $XDG_CONFIG_HOME/relic/relic.yaml
         if !self.config_dir_set {
